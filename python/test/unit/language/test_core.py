@@ -2333,8 +2333,8 @@ def get_reduce_input(dtype_str, shape):
 @pytest.mark.parametrize("op, dtype_str, shape", [(op, dtype, shape) for op in [
     'min',
     'max',
-    'min-with-indices',
-    'max-with-indices',
+    'argmin-fast',
+    'argmax-fast',
     'argmin-tie-break-left',
     'argmax-tie-break-left',
     'sum',
@@ -2350,9 +2350,7 @@ def test_reduce1d(op, dtype_str, shape, num_ctas, device):
         GENERATE_TEST_HERE
         tl.store(Z, z)
 
-    if 'with-indices' in op:
-        patch = f'z, _ = tl.{op.split("-")[0]}(x, axis=0, return_indices=True)'
-    elif 'arg' in op:
+    if 'arg' in op:
         tie_break_left = 'tie-break-left' in op
         patch = f'z = tl.{op.split("-")[0]}(x, axis=0, tie_break_left={tie_break_left})'
     else:
@@ -2364,8 +2362,8 @@ def test_reduce1d(op, dtype_str, shape, num_ctas, device):
         'sum': np.sum,
         'max': np.max,
         'min': np.min,
-        'max-with-indices': np.max,
-        'min-with-indices': np.min,
+        'argmin-fast': np.argmin,
+        'argmax-fast': np.argmax,
         'argmin-tie-break-left': np.argmin,
         'argmax-tie-break-left': np.argmax,
     }[op]
@@ -2373,9 +2371,9 @@ def test_reduce1d(op, dtype_str, shape, num_ctas, device):
         x[3:10] = x[numpy_op(x)]
     x_tri = to_triton(x, device=device)
     # numpy result
-    z_dtype_str = 'int32' if 'tie-break-left' in op else dtype_str
+    z_dtype_str = 'int32' if 'arg' in op else dtype_str
     z_tri_dtype_str = z_dtype_str
-    if 'tie-break-left' not in op and dtype_str == 'bfloat16':
+    if 'arg' not in op and dtype_str == 'bfloat16':
         z_dtype_str = 'float32'
         z_ref = numpy_op(x).astype(getattr(np, z_dtype_str))
         # trunc mantissa for a fair comparison of accuracy

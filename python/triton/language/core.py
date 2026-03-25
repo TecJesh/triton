@@ -1237,13 +1237,13 @@ class tensor(base_value):
     def ravel(self) -> tensor:
         ...
 
-    def max(self, axis=None, return_indices=False, return_indices_tie_break_left=True, keep_dims=False) -> tensor:
+    def max(self, axis=None, keep_dims=False, propagate_nan=PropagateNan.NONE) -> tensor:
         ...
 
     def argmax(self, axis, tie_break_left=True, keep_dims=False) -> tensor:
         ...
 
-    def min(self, axis=None, return_indices=False, return_indices_tie_break_left=True, keep_dims=False) -> tensor:
+    def min(self, axis=None, keep_dims=False, propagate_nan=PropagateNan.NONE) -> tensor:
         ...
 
     def argmin(self, axis, tie_break_left=True, keep_dims=False) -> tensor:
